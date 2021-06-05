@@ -82,7 +82,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
       volumes:
-        - $PWD/src:/usr/src/app/src/
+        - ${{ env.GITHUB_WORKSPACE }}/src:/usr/src/app/src/
 
     steps:
     - uses: actions/checkout@v1
