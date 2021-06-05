@@ -8,7 +8,7 @@
     "url": "https://github.com/xxxxxxxx"
   },
   "scripts": {
-    "test:e2e:ci": "testcafe firefox:headless:marionettePort=9223,chromium:headless:cdpPort=9224 \"src/**/*.e2e.ts\"",
+    "test:e2e:ci": "testcafe firefox:headless:marionettePort=9223,chromium:headless:cdpPort=9224 -–browser-init-timeout 180000 \"src/**/*.e2e.ts\"",
     "test:e2e": "testcafe chrome:headless \"src/**/*.e2e.ts\"",
     "test:e2e:watch": "testcafe chrome --live --skip-js-errors --skip-uncaught-errors \"src/**/*.e2e.ts\"",
     "test:e2e:screenshot": "testcafe chrome --live -S -s test/screenshots --skip-js-errors --skip-uncaught-errors \"src/**/*.e2e.ts\"",
