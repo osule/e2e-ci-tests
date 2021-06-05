@@ -8,16 +8,16 @@ on:
     branches:
     - main
 
+env:
+  BUILD_VER: 1.0.${{github.run_number}}
+  IMAGE: ghcr.io/${{ github.actor }}/headless-browsers-node-14
 defaults:
   run:
     working-directory: .
 
 jobs:
-  build-job:
+  build-and-push-image-job:
     runs-on: ubuntu-latest
-    env:
-      BUILD_VER: 1.0.${{github.run_number}}
-      IMAGE: ghcr.io/${{ github.actor }}/headless-browsers-node-14
 
     steps:
     - uses: actions/checkout@v2
