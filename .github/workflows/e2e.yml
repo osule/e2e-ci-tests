@@ -103,7 +103,10 @@ jobs:
     - run: yarn
       if: steps.cache-node-modules.cache-hit != 'true'
    
-    - name: Run tests in ${{ matrix.browser }} browser
-      run: npm run test:e2e:ci-${{ matrix.browser }}
+    - name: Run first-offers tests in ${{ matrix.browser }} browser
+      run: npm run test:e2e:ci-${{ matrix.browser }} -- src/widgets/first-offers/*.e2e.ts
+
+    - name: Run second-offers tests in ${{ matrix.browser }} browser
+      run: npm run test:e2e:ci-${{ matrix.browser }} -- src/widgets/second-offers/*.e2e.ts
    
     needs: build-and-push-image-job
