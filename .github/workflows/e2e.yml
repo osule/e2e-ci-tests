@@ -9,8 +9,8 @@ on:
     - main
 
 env:
-  BUILD_VER: 1.0.${{github.run_number}}
-  IMAGE: ghcr.io/${{ github.actor }}/headless-browsers-node-14
+  BUILD_VER: 1.0.${{ github.run_number }}
+  IMAGE: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
 defaults:
   run:
     working-directory: .
@@ -45,7 +45,7 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.ghcr_token }}
 
     - name: Build and push
