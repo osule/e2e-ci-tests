@@ -76,8 +76,6 @@ jobs:
 
     container:
       image: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
-      volumes:
-        - /home/runner/work/e2e-ci-tests/e2e-ci-tests/node_modules:/usr/src/app/node_modules
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
@@ -85,12 +83,15 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
     - name: Cache node modules
       id: cache-node-modules
       uses: actions/cache@v2
       with:
-        path: |
-          node_modules
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-${{ hashFiles('package.json') }}
    
     - run: yarn
