@@ -25,6 +25,7 @@ jobs:
         echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         echo "BUILD_VER=1.0.${{ github.run_number }}" >> $GITHUB_ENV
         echo "IMAGE=ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14" >> $GITHUB_ENV
+        echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" >> $GITHUB_ENV
 
     - name: Cache Build Image
       id: cache-build-image
@@ -56,15 +57,15 @@ jobs:
         labels: |
           org.opencontainers.image.authors=${{ github.repository_owner }}
           org.opencontainers.image.created=${{ env.BUILD_DATE }}
-          org.opencontainers.image.description=Created from commit ${{ env.GIT_SHA }} and ref ${{ github.ref }}
-          org.opencontainers.image.ref.name=${{ github.ref }}
+          org.opencontainers.image.description=Created from commit ${{ env.GIT_SHA }} and ref ${{ env.GIT_REF }}
+          org.opencontainers.image.ref.name=${{ env.GIT_REF }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.version=${{ env.BUILD_VER }}
         tags: |
           ${{ env.IMAGE }}:latest
           ${{ env.IMAGE }}:${{ env.GIT_SHA }}
-          ${{ env.IMAGE }}:${{ github.ref }}
+          ${{ env.IMAGE }}:${{ env.GIT_REF }}
           ${{ env.IMAGE }}:${{ env.BUILD_VER }}
 
     - name: Image digest
