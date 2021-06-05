@@ -8,4 +8,6 @@ RUN apk update \
 
 WORKDIR /usr/src/app
 
+RUN chown -R node:node .
+
 USER node
