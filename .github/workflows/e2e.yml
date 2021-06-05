@@ -79,11 +79,12 @@ jobs:
         browser:
             - chromium
             - firefox 
-    container:
+    container: 
       image: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
+      options: --cpus 1 --memory-reservation 2000000000
 
     steps:
     - uses: actions/checkout@v1
