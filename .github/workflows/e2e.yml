@@ -97,6 +97,10 @@ jobs:
     - run: yarn
       if: steps.cache-node-modules.cache-hit != 'true'
    
-    - run: npm run test:e2e:ci
+    - name: Run tests in Firefox browser
+      run: npm run test:e2e:ci-firefox
+
+    - name: Run tests in Chromium browser
+      run: npm run test:e2e:ci-chromium
    
     needs: build-and-push-image-job
