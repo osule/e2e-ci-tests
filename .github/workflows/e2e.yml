@@ -34,7 +34,7 @@ jobs:
         path: |
           Dockerfile
           package.json
-        key: ${{ runner.os }}-${{ hashFiles('**/{Dockerfile|package.json}') }}
+        key: ${{ runner.os }}-${{ hashFiles('Dockerfile', 'package.json') }}
 
     - name: Set up Docker Buildx
       id: buildx
