@@ -15,8 +15,17 @@ defaults:
 jobs:
   build-job:
     runs-on: ubuntu-latest
+    env:
+      BUILD_VER: 1.0.${{github.run_number}}
+      IMAGE: ghcr.io/${{ github.actor }}/headless-browsers-node-14
+
     steps:
     - uses: actions/checkout@v2
+
+    - name: Set Environment Variables
+      run: |
+        echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+        echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Cache Build Image
       id: cache-build-image
@@ -40,11 +49,23 @@ jobs:
         password: ${{ secrets.ghcr_token }}
 
     - name: Build and push
-      id: docker_build
+      id: docker-build-push
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: headless-browsers-node-14:latest
+        labels: |
+          org.opencontainers.image.authors=${{ github.repository_owner }}
+          org.opencontainers.image.created=${{ env.BUILD_DATE }}
+          org.opencontainers.image.description=Created from commit ${{ env.GIT_SHA }} and ref ${{ github.ref }}
+          org.opencontainers.image.ref.name=${{ github.ref }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.version=${{ env.BUILD_VER }}
+        tags: |
+          ${{ env.IMAGE }}:latest
+          ${{ env.IMAGE }}:${{ env.GIT_SHA }}
+          ${{ env.IMAGE }}:${{ github.ref }}
+          ${{ env.IMAGE }}:${{ env.BUILD_VER }}
 
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
