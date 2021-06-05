@@ -84,7 +84,7 @@ jobs:
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
-      options: --cpus 1 --memory-reservation 2000000000
+      options: --cpus 1 --memory 1000000000
 
     steps:
     - uses: actions/checkout@v1
