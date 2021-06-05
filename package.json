@@ -8,7 +8,7 @@
     "url": "https://github.com/xxxxxxxx"
   },
   "scripts": {
-    "test:e2e:ci-firefox": "testcafe --browser-init-timeout 300000 firefox:headless src/**/*.e2e.ts",
+    "test:e2e:ci-firefox": "testcafe --browser-init-timeout 300000 -c 1 firefox:headless src/**/*.e2e.ts",
     "test:e2e:ci-chromium": "testcafe chromium:headless src/**/*.e2e.ts",
     "test:e2e": "testcafe chrome:headless \"src/**/*.e2e.ts\"",
     "test:e2e:watch": "testcafe chrome --live --skip-js-errors --skip-uncaught-errors \"src/**/*.e2e.ts\"",
