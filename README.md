@@ -35,6 +35,9 @@ The e2e workflow consists of 3 jobs:
 
 # Issue running tests in Firefox headless
 
-Firefox hangs when running in headless mode in the CI. This is not an issue on MacOS.
-However it takes about 30 mins to complete running the tests.
+Firefox hangs when running in headless mode in the CI. 
+
+This is not an issue on MacOS.
+Although, it takes about 30 mins to complete running the tests.
+
 See the `try_macos` branch for the Github Actions workflow configuration.
