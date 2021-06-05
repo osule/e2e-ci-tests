@@ -32,10 +32,8 @@ jobs:
       id: cache-build-image
       uses: actions/cache@v2
       with:
-        path: |
-          Dockerfile
-          package.json
-        key: ${{ runner.os }}-${{ hashFiles('Dockerfile', 'package.json') }}
+        path: Dockerfile
+        key: ${{ runner.os }}-${{ hashFiles('Dockerfile') }}
 
     - name: Set up Docker Buildx
       id: buildx

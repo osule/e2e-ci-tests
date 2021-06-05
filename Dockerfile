@@ -7,8 +7,5 @@ RUN apk update \
   && rm -rf /var/cache/apk/* 
 
 WORKDIR /usr/src/app
-COPY package.json .
-
-RUN yarn 
 
 USER node
