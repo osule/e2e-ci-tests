@@ -7,7 +7,3 @@ RUN apk update \
   && rm -rf /var/cache/apk/* 
 
 WORKDIR /usr/src/app
-
-RUN chown -R node:node .
-
-USER node
