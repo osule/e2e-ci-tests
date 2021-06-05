@@ -1,0 +1,35 @@
+name: E2E tests for Widgets
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  build-job:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Build Image
+      id: cache-build-image
+      uses: actions/cache@v2
+      with:
+        path: |
+          Dockerfile
+          package.json
+        key: ${{ runner.os }}-${{ hashFiles('**/{Dockerfile|package.json}') }}
+
+    - name: Build image
+      if: steps.cache-build-image.outputs.cache-hit != 'true'
+      run: |
+        VERSION=`awk 'BEGIN {FS = "version="  }  {gsub(/"/, "", $2); if (length($2) > 0)  print $2}' Dockerfile`
+        docker build -t "headless-browsers-node-14:$VERSION"  .
+ 
