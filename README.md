@@ -32,4 +32,9 @@ The e2e workflow consists of 3 jobs:
     ```bash
     docker run -it -v $PWD:/usr/src/app --network sample headless-browsers-node-14 sh -c "yarn && npm run test:e2e:ci-firefox"
     ```
-    
+
+# Issue running tests in Firefox headless
+
+Firefox hangs when running in headless mode in the CI. This is not an issue on MacOS.
+However it takes about 30 mins to complete running the tests.
+See the `try_macos` branch for the Github Actions workflow configuration.
