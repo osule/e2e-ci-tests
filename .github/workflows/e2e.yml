@@ -82,5 +82,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+
+    - name: Install Dependencies
+      id: cache-install-node-modules
+      uses: actions/cache@v2
+      with:
+        path: package.json
+        key: ${{ runner.os }}-${{ hashFiles('package.json') }}
+   
+    - run: yarn
+      if: steps.cache-install-node-modules.cache-hit != 'true'
+   
     - run: npm run test:e2e-ci
+   
     needs: build-and-push-image-job
