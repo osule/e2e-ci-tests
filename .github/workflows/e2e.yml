@@ -27,11 +27,24 @@ jobs:
           package.json
         key: ${{ runner.os }}-${{ hashFiles('**/{Dockerfile|package.json}') }}
 
-    - name: Build image
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
       if: steps.cache-build-image.outputs.cache-hit != 'true'
-      run: |
-        VERSION=`awk 'BEGIN {FS = "version="  }  {gsub(/"/, "", $2); if (length($2) > 0)  print $2}' Dockerfile`
-        IMAGE_TAG="headless-browsers-node-14:$VERSION"
-        docker build -t $IMAGE_TAG  .
-        docker tag $IMAGE_TAG ghcr.io/${{ github.actor }}/$IMAGE_TAG
-        docker push ghcr.io/${{ github.actor }}/$IMAGE_TAG
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.ghcr_token }}
+
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: headless-browsers-node-14:latest
+
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
