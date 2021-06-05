@@ -1,0 +1,23 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "e2e",
+  "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xxxxxxxx"
+  },
+  "scripts": {
+    "test:e2e": "testcafe chrome:headless \"src/**/*.e2e.ts\"",
+    "test:e2e:watch": "testcafe chrome --live --skip-js-errors --skip-uncaught-errors \"src/**/*.e2e.ts\"",
+    "test:e2e:screenshot": "testcafe chrome --live -S -s test/screenshots --skip-js-errors --skip-uncaught-errors \"src/**/*.e2e.ts\"",
+    "test:e2e:video": "testcafe chrome --live --video test/videos singleFile=true --skip-js-errors --skip-uncaught-errors --speed 0.01 \"src/**/*.e2e.ts\"",
+    "test:e2e:report": "testcafe chrome --reporter html:test/reports/report.html \"src/**/*.e2e.ts\""
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "testcafe": "^1.14.2",
+    "testcafe-reporter-html": "^1.4.6"
+  }
+}
