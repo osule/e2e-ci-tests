@@ -10,7 +10,7 @@ on:
 
 defaults:
   run:
-    working-directory: .
+    working-directory: /usr/src/app/e2e/
 
 
 jobs:
@@ -76,6 +76,8 @@ jobs:
 
     container:
       image: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
+      volumes:
+        - /usr/src/app/e2e/node_modules:/usr/src/app/node_modules
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
@@ -83,15 +85,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Install Dependencies
-      id: cache-install-node-modules
+    - name: Cache node modules
+      id: cache-node-modules
       uses: actions/cache@v2
       with:
-        path: package.json
+        path: |
+          node_modules
         key: ${{ runner.os }}-${{ hashFiles('package.json') }}
    
     - run: yarn
-      if: steps.cache-install-node-modules.cache-hit != 'true'
+      if: steps.cache-node-modules.cache-hit != 'true'
    
     - run: npm run test:e2e-ci
    
