@@ -79,7 +79,6 @@ jobs:
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
-      options: --shm-size=2G
 
     steps:
     - uses: actions/checkout@v1
