@@ -1,12 +1,14 @@
 # Setup E2E Tests in Github CI
 
-The e2e workflow consists of 3 jobs:
+The e2e workflow consists of 2 jobs:
 
 - build-and-push-image-job
 
     This builds image from the directives in [Dockerfile](./Dockerfile) and pushes it to Github Container Registry.
 
     The image name is `ghcr.io/<github-repository-owner>/headless-browsers-node-14:latest`.
+
+    > You  must enable [improved container support](https://docs.github.com/en/packages/working-with-a-github-packages-registry/enabling-improved-container-support-with-the-container-registry) for your Github account in order to push images to `ghcr.io`
 
 - test-job
 
