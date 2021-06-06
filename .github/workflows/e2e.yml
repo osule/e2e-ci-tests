@@ -23,6 +23,9 @@ jobs:
         echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         echo "IMAGE=ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14" >> $GITHUB_ENV
 
+    # The rest steps of this job will only be run if cache misses.
+    # Login to GHCR, Build and Push steps of the job are performed only on changes
+    # to the Dockerfile.
     - name: Cache Build Image
       id: cache-build-image
       uses: actions/cache@v2
@@ -39,6 +42,10 @@ jobs:
       uses: docker/login-action@v1.9.0
       if: steps.cache-build-image.outputs.cache-hit != 'true'
       with:
+        # Login credentials are provided by Github Actions CI
+        # Reference:
+        # - github context (https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context)
+        # - workflow recommendations (https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
@@ -71,6 +78,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # These are the supported browsers that have a run scripts for CI in `package.json`.
+        # Available scripts are `test:e2e:ci-firefox`, `test:e2e:ci-chrome`.
+        # They follow the format `test:e2e:ci-<browser>`.
+        # These scripts will be run in parallel.
         browser:
             - chromium
             - firefox 
@@ -83,6 +94,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    # Keep cache of packages downloaded by yarn.
+    # https://classic.yarnpkg.com/en/docs/cli/cache/
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -94,6 +107,7 @@ jobs:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-${{ hashFiles('package.json') }}
    
+    # Run yarn only when no cache found.
     - run: yarn
       if: steps.cache-node-modules.cache-hit != 'true'
    
