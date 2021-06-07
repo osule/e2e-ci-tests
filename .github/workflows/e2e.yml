@@ -3,14 +3,17 @@ name: E2E tests for Widgets
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_11.4.app/Contents/Developer
 
 jobs:
   build-and-push-image-job:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +22,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
         echo "BUILD_VER=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-        echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" >> $GITHUB_ENV
+        echo "GIT_REF=$((git symbolic-ref -q --short HEAD || git describe --tags --exact-match) | awk 'gsub(/\//, \'-\')')" >> $GITHUB_ENV
         echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         echo "IMAGE=ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14" >> $GITHUB_ENV
 
@@ -30,8 +33,18 @@ jobs:
       id: cache-build-image
       uses: actions/cache@v2
       with:
-        path: Dockerfile
+        path: ~/.docker/machine/cache/boot2docker.iso 
         key: ${{ runner.os }}-${{ hashFiles('Dockerfile') }}
+
+    - name: Install docker # Taken from https://github.com/actions/virtual-environments/issues/1143#issuecomment-652264388
+      run: |
+        mkdir -p ~/.docker/machine/cache
+        curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
+        brew install docker docker-machine
+        docker-machine create --driver virtualbox default
+        docker-machine env default
+        brew services start docker-machine
+      if: steps.cache-build-image.outputs.cache-hit != 'true'
 
     - name: Set up Docker Buildx
       id: buildx
@@ -74,7 +87,7 @@ jobs:
       run: echo ${{ steps.docker_build.outputs.digest }}
 
   test-job:
-    runs-on: ubuntu-latest
+    runs-on: macos-10.15
     strategy:
       fail-fast: false
       matrix:
@@ -85,36 +98,30 @@ jobs:
         browser:
             - chromium
             - firefox 
-    container: 
-      image: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ github.token }}
 
     steps:
     - uses: actions/checkout@v1
+    - name: Install docker # Taken from https://github.com/actions/virtual-environments/issues/1143#issuecomment-652264388
+      run: |
+        mkdir -p ~/.docker/machine/cache
+        curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
+        brew install docker docker-machine
+        docker-machine create --driver virtualbox default
+        docker-machine env default
+        brew services start docker-machine
 
-    # Keep cache of packages downloaded by yarn.
-    # https://classic.yarnpkg.com/en/docs/cli/cache/
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
 
-    - name: Cache node modules
-      id: cache-node-modules
-      uses: actions/cache@v2
+    - name: Login to DockerHub
+      uses: docker/login-action@v1.9.0
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-${{ hashFiles('package.json') }}
-   
-    # Run yarn only when no cache found.
-    - run: yarn
-      if: steps.cache-node-modules.cache-hit != 'true'
-   
-    - name: Run first-offers tests in ${{ matrix.browser }} browser
-      run: npm run test:e2e:ci-${{ matrix.browser }} -- src/widgets/first-offers/*.e2e.ts
-
-    - name: Run second-offers tests in ${{ matrix.browser }} browser
-      run: npm run test:e2e:ci-${{ matrix.browser }} -- src/widgets/second-offers/*.e2e.ts
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ github.token }}
+    - name: Run tests in ${{ matrix.browser }}
+      run: |
+        docker run -t -v $PWD:/usr/src/app ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14 sh -c "yarn && npm run test:e2e:ci-${{ matrix.browser }}"
    
     needs: build-and-push-image-job
