@@ -1,6 +1,11 @@
 # Setup E2E Tests in Github CI
 
-The e2e workflow consists of 2 jobs:
+There are two workflows in this project. 
+
+- `first-widget.yml`
+- `second-widget.yml`
+
+Both workflows consists of 2 jobs:
 
 - build-and-push-image-job
 
@@ -12,7 +17,7 @@ The e2e workflow consists of 2 jobs:
 
 - test-job
 
-    Tests are run in container spawn from the built image for the widgets.
+    Tests for the widget in focus are run in container spawn from the built image for the widgets.
 
 
 # Running locally

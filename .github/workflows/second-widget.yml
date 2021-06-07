@@ -1,0 +1,117 @@
+name: E2E tests for Second Widget
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build-and-push-image-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set Environment Variables
+      run: |
+        echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+        echo "BUILD_VER=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+        echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" >> $GITHUB_ENV
+        echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+        echo "IMAGE=ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14" >> $GITHUB_ENV
+
+    # The rest steps of this job will only be run if cache misses.
+    # Login to GHCR, Build and Push steps of the job are performed only on changes
+    # to the Dockerfile.
+    - name: Cache Build Image
+      id: cache-build-image
+      uses: actions/cache@v2
+      with:
+        path: Dockerfile
+        key: ${{ runner.os }}-${{ hashFiles('Dockerfile') }}
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+      if: steps.cache-build-image.outputs.cache-hit != 'true'
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1.9.0
+      if: steps.cache-build-image.outputs.cache-hit != 'true'
+      with:
+        # Login credentials are provided by Github Actions CI
+        # Reference:
+        # - github context (https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context)
+        # - workflow recommendations (https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ github.token }}
+
+    - name: Build and push
+      id: docker-build-push
+      uses: docker/build-push-action@v2
+      if: steps.cache-build-image.outputs.cache-hit != 'true'
+      with:
+        push: true
+        labels: |
+          org.opencontainers.image.authors=${{ github.repository_owner }}
+          org.opencontainers.image.created=${{ env.BUILD_DATE }}
+          org.opencontainers.image.description=Created from commit ${{ env.GIT_SHA }} and ref ${{ env.GIT_REF }}
+          org.opencontainers.image.ref.name=${{ env.GIT_REF }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.version=${{ env.BUILD_VER }}
+        tags: |
+          ${{ env.IMAGE }}:latest
+          ${{ env.IMAGE }}:${{ env.GIT_SHA }}
+          ${{ env.IMAGE }}:${{ env.GIT_REF }}
+          ${{ env.IMAGE }}:${{ env.BUILD_VER }}
+
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
+
+  test-job:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # These are the supported browsers that have a run scripts for CI in `package.json`.
+        # Available scripts are `test:e2e:ci-firefox`, `test:e2e:ci-chrome`.
+        # They follow the format `test:e2e:ci-<browser>`.
+        # These scripts will be run in parallel.
+        browser:
+            - chromium
+            - firefox 
+    container: 
+      image: ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ github.token }}
+
+    steps:
+    - uses: actions/checkout@v1
+
+    # Keep cache of packages downloaded by yarn.
+    # https://classic.yarnpkg.com/en/docs/cli/cache/
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - name: Cache node modules
+      id: cache-node-modules
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-${{ hashFiles('package.json') }}
+   
+    # Run yarn only when no cache found.
+    - run: yarn
+      if: steps.cache-node-modules.cache-hit != 'true'
+
+    - name: Run second-offers tests in ${{ matrix.browser }} browser
+      run: npm run test:e2e:ci-${{ matrix.browser }} -- src/widgets/second-offers/*.e2e.ts
+   
+    needs: build-and-push-image-job
