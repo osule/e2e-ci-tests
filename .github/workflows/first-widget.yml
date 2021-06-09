@@ -19,7 +19,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
         echo "BUILD_VER=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-        echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" >> $GITHUB_ENV
+        echo "GIT_REF=$(echo $(git symbolic-ref -q --short HEAD || git describe --tags --exact-match) | awk 'gsub(/\//, "-")1')" >> $GITHUB_ENV
         echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         echo "IMAGE=ghcr.io/${{ github.repository_owner }}/headless-browsers-node-14" >> $GITHUB_ENV
 
