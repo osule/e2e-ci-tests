@@ -86,7 +86,7 @@ jobs:
             - chromium
             - firefox 
     container: 
-      image: ${{ secrets.GCLOUD_ARTIFACT_REPOSITORY }}/e2e-test
+      image: "${{ secrets.GCLOUD_ARTIFACT_REPOSITORY }}/e2e-test"
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
