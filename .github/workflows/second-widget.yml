@@ -21,7 +21,7 @@ jobs:
         echo "BUILD_VER=1.0.${{ github.run_number }}" >> $GITHUB_ENV
         echo "GIT_REF=$(echo $(git symbolic-ref -q --short HEAD || git describe --tags --exact-match) | awk 'gsub(/\//, "-")1')" >> $GITHUB_ENV
         echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
-        echo "IMAGE=${{ secrets.GCLOUD_ARTIFACT_REPOSITORY }}/e2e-test" >> $GITHUB_ENV
+        echo "IMAGE=us-docker.pkg.dev/troupon-1103/hello/e2e-test" >> $GITHUB_ENV
 
     # The rest steps of this job will only be run if cache misses.
     # Login to GHCR, Build and Push steps of the job are performed only on changes
@@ -46,7 +46,7 @@ jobs:
         # Reference:
         # - github context (https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context)
         # - workflow recommendations (https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions)
-        registry: ${{ secrets.GCLOUD_ARTIFACT_REPOSITORY }}
+        registry: us-docker.pkg.dev/troupon-1103/hello
         username: _json_key
         password: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY_JSON }}
 
@@ -86,7 +86,7 @@ jobs:
             - chromium
             - firefox 
     container: 
-      image: "${{ secrets.GCLOUD_ARTIFACT_REPOSITORY }}/e2e-test"
+      image: us-docker.pkg.dev/troupon-1103/hello/e2e-test
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ github.token }}
