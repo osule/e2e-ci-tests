@@ -36,15 +36,15 @@ jobs:
         password: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY_JSON }}
 
     - name: Get Image manifest
-        id: get-manifest
-        run: |
-          docker manifest inspect ${{ env.IMAGE }}
-          if [[ $? == 1 ]]
-            echo "::set-output found=false"
-          else
-            echo "::set-output found=true"
-          fi
-        shell: bash
+      id: get-manifest
+      run: |
+        docker manifest inspect ${{ env.IMAGE }}
+        if [[ $? == 1 ]]
+          echo "::set-output found=false"
+        else
+          echo "::set-output found=true"
+        fi
+      shell: bash
 
     # The rest steps of this job will only be run if cache misses.
     # Login to GHCR, Build and Push steps of the job are performed only on changes
