@@ -98,10 +98,10 @@ jobs:
             - chromium
             - firefox 
     container: 
-      image: us-docker.pkg.dev/troupon-1103/hello/e2e-test"
+      image: us-docker.pkg.dev/troupon-1103/hello/e2e-test
       credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ github.token }}
+        username: _json_key
+        password: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY_JSON }}
 
     steps:
     - uses: actions/checkout@v1
