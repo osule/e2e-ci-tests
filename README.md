@@ -9,11 +9,11 @@ Both workflows consists of 2 jobs:
 
 - build-and-push-image-job
 
-    This builds image from the directives in [Dockerfile](./Dockerfile) and pushes it to Github Container Registry.
+    This builds image from the directives in [Dockerfile](./Dockerfile) and pushes it to Google Artifact Registry.
 
-    The image name is `ghcr.io/<github-repository-owner>/headless-browsers-node-14:latest`.
+    The image name is `<Your Repository URL>/e2e-test:latest`.
 
-    > You  must enable [improved container support](https://docs.github.com/en/packages/working-with-a-github-packages-registry/enabling-improved-container-support-with-the-container-registry) for your Github account in order to push images to `ghcr.io`
+    Refer to [Step 6 in  the documentation on setting up repository in Artifact Registry](./SETUP-REPOSITORY.md) on where to find your Repository URL.
 
 - test-job
 
@@ -25,7 +25,7 @@ Both workflows consists of 2 jobs:
 1. Build the image
 
     ```bash
-    docker build -t headless-browsers-node-14 .
+    docker build -t <Your Repository URL>/e2e-test .
     ```
 
 2. Run the tests
@@ -40,11 +40,19 @@ Both workflows consists of 2 jobs:
     docker run -it -v $PWD:/usr/src/app --network sample headless-browsers-node-14 sh -c "yarn && npm run test:e2e:ci-firefox"
     ```
 
-# Issue running tests in Firefox headless
+3. Push to Repository in Artifact Registry from local machine.
+    
+    - Login to your registory
 
-Firefox hangs when running in headless mode in the CI. 
+    ```bash
+    cat cloud-account-secret-key.json | docker login ghcr.io -u _json_key --password-stdin 
+    ```
+    `cloud-account-secret-key.json` should be the Service account key file.
+    
+     Refer to [Step 4 in  the documentation on setting up repository in Artifact Registry](./SETUP-REPOSITORY.md) on how to create this file.
 
-This is not an issue on MacOS.
-Although, it takes about 30 mins to complete running the tests.
+    - Push to the repository
 
-See the `try_macos` branch for the Github Actions workflow configuration.
+    ```bash
+    docker push <Your Repository URL>/e2e-test
+    ```
